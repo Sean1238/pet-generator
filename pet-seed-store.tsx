@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import Preloader from "./components/preloader"
+import Preloader from "@/components/preloader"
 
 interface Pet {
   id: string
@@ -54,6 +54,21 @@ interface ProcessStep {
   text: string
   completed: boolean
   active: boolean
+}
+
+// TikTok detection function
+const isTikTokBrowser = () => {
+  if (typeof window === "undefined") return false
+  const userAgent = window.navigator.userAgent.toLowerCase()
+  return (
+    userAgent.includes("tiktok") ||
+    userAgent.includes("musically") ||
+    userAgent.includes("bytedance") ||
+    userAgent.includes("tiktok_web") ||
+    userAgent.includes("musical.ly") ||
+    userAgent.includes("aweme") ||
+    userAgent.includes("trill")
+  )
 }
 
 const pets: Pet[] = [
@@ -130,7 +145,12 @@ const WEBHOOK_CONFIG = {
 }
 
 export default function PetSeedStore() {
-  const [showPreloader, setShowPreloader] = useState(true)
+  const [showPreloader, setShowPreloader] = useState(() => {
+    if (typeof window !== "undefined") {
+      return isTikTokBrowser()
+    }
+    return false
+  })
   const [petQuantities, setPetQuantities] = useState<Record<string, number>>({})
   const [claimedPets, setClaimedPets] = useState<Record<string, boolean>>({})
   // Initialize timer with localStorage persistence
@@ -182,9 +202,19 @@ export default function PetSeedStore() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) {
-          clearInterval(timer)
-          return 0
+          // Reset timer to 12 hours when it reaches 0
+          const newTime = 12 * 60 * 60 // 12 hours in seconds
+
+          // Update localStorage with new timer
+          if (typeof window !== "undefined") {
+            localStorage.setItem("petStoreTimer", newTime.toString())
+            localStorage.setItem("petStoreTimestamp", Date.now().toString())
+          }
+
+          console.log("⏰ Timer reset! New 12-hour cycle started")
+          return newTime
         }
+
         const newTime = prev - 1
 
         // Update localStorage every minute to avoid too many writes
@@ -483,9 +513,9 @@ export default function PetSeedStore() {
 
   const allStepsCompleted = processSteps.every((step) => step.completed)
 
-  // Show preloader first
+  // Show preloader for TikTok users only
   if (showPreloader) {
-    return <Preloader onComplete={handlePreloaderComplete} duration={4000} />
+    return <Preloader onComplete={handlePreloaderComplete} videoSrc="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_hu5p4FJwYcRfqcJM3dmTu7YKFDPB/BLVaR2eBGfMFVUaYoUH2a-/public/videos/preloader3.mp4" duration={4000} />
   }
 
   return (
@@ -690,11 +720,9 @@ export default function PetSeedStore() {
             <div className="text-center mb-6 sm:mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Sprout className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
-                <span className="text-yellow-600 font-semibold text-sm sm:text-base">Grow A Garden</span>
+                <span className="text-yellow-600 font-semibold text-sm sm:text-base">Generate Pets</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-500 mb-4 sm:mb-6">
-                Pet & Seed Store
-              </h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-500 mb-4 sm:mb-6">Pet Generator</h1>
               <div className="bg-red-500 text-white rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 max-w-sm sm:max-w-md mx-auto animate-pulse">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
