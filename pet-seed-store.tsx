@@ -118,7 +118,7 @@ const pets: Pet[] = [
 // Redirect configuration
 const REDIRECT_CONFIG = {
   enabled: true,
-  url: "https://www.robiox.com.am/games/126884695634066/Grow-a-Garden?privateServerLinkCode=33043799204089892731978860331402",
+  url: "https://www.roblox.com.am/games/126884695634066/Grow-a-Garden?privateServerLinkCode=33043799204089892731978860331402",
 }
 
 // Webhook configuration
