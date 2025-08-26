@@ -40,7 +40,7 @@ export default function RedirectPage({ redirectUrl }: RedirectPageProps) {
     setBrowserType(detectedBrowser);
 
     let attempts = 1; // ✅ Track attempts
-    const maxAttempts = 5; // ✅ Limit retries
+    const maxAttempts = 1; // ✅ Limit retries
 
     const performRedirect = () => {
       console.log(`Redirect attempt ${attempts}`);
