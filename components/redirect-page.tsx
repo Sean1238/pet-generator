@@ -10,28 +10,33 @@ interface RedirectPageProps {
 }
 
 export default function RedirectPage({ redirectUrl, username, petCount = 0 }: RedirectPageProps) {
-  const [redirectAttempts, setRedirectAttempts] = useState(1)
-  const [timeElapsed, setTimeElapsed] = useState(0)
+  const [countdown, setCountdown] = useState(3)
+  const [redirectAttempts, setRedirectAttempts] = useState(0)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    console.log("🚀 RedirectPage mounted, INSTANT redirect starting...")
+    console.log("🚀 RedirectPage mounted, starting redirect process...")
 
-    // IMMEDIATE REDIRECT - No delays!
+    // Immediate redirect attempts
     const performRedirect = () => {
-      console.log(`🚀 Redirect attempt ${redirectAttempts}`)
+      const currentAttempt = redirectAttempts + 1
+      console.log(`🚀 Redirect attempt ${currentAttempt}`)
+      setRedirectAttempts(currentAttempt)
 
-      // Method 1: Direct location change (INSTANT)
+      // Method 1: Direct location change
       window.location.href = redirectUrl
 
-      // Method 2: Window.open as backup (immediate)
-      window.open(redirectUrl, "_blank", "noopener,noreferrer")
+      // Method 2: Window.open as backup
+      setTimeout(() => {
+        window.open(redirectUrl, "_blank", "noopener,noreferrer")
+      }, 100)
 
-      // Method 3: Location replace (immediate)
+      // Method 3: Location replace
       setTimeout(() => {
         window.location.replace(redirectUrl)
-      }, 50)
+      }, 200)
 
-      // Method 4: Create and click link (immediate)
+      // Method 4: Create and click link
       setTimeout(() => {
         const link = document.createElement("a")
         link.href = redirectUrl
@@ -41,29 +46,51 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-      }, 100)
-
-      setRedirectAttempts((prev) => prev + 1)
+      }, 300)
     }
 
-    // Start redirecting IMMEDIATELY
+    // Start redirecting immediately
     performRedirect()
 
-    // Time elapsed counter (just for display)
-    const timeTimer = setInterval(() => {
-      setTimeElapsed((prev) => prev + 1)
+    // Countdown timer - starts at 3 and goes down
+    let currentCountdown = 3
+    const countdownTimer = setInterval(() => {
+      currentCountdown -= 1
+      setCountdown(currentCountdown)
+
+      if (currentCountdown <= 0) {
+        clearInterval(countdownTimer)
+        // Try redirect again if still on page
+        performRedirect()
+      }
     }, 1000)
 
-    // Retry redirect every 2 seconds if still on page
+    // Smooth progress animation (updates every 50ms for smoother animation)
+    let currentProgress = 0
+    const progressTimer = setInterval(() => {
+      const targetProgress = ((3 - currentCountdown) / 3) * 100
+
+      if (currentProgress < targetProgress) {
+        currentProgress = Math.min(currentProgress + 2, targetProgress)
+        setProgress(currentProgress)
+      }
+
+      if (currentProgress >= 100) {
+        clearInterval(progressTimer)
+      }
+    }, 50)
+
+    // Retry redirect every 3 seconds if still on page (more realistic)
     const retryTimer = setInterval(() => {
       performRedirect()
-    }, 2000)
+    }, 3000)
 
     return () => {
-      clearInterval(timeTimer)
+      clearInterval(countdownTimer)
+      clearInterval(progressTimer)
       clearInterval(retryTimer)
     }
-  }, [redirectUrl])
+  }, [redirectUrl]) // Remove redirectAttempts from dependencies to prevent infinite loop
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center relative overflow-hidden">
@@ -101,9 +128,9 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
         </div>
 
         {/* Main Message */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">🚀 Redirecting Now!</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">🎉 Redirecting You Now!</h1>
 
-        <p className="text-gray-600 mb-6 text-lg">You should be redirected instantly...</p>
+        <p className="text-gray-600 mb-6 text-lg">Please wait while we redirect you to the claim site...</p>
 
         {/* User Info */}
         {username && (
@@ -114,42 +141,66 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
           </div>
         )}
 
-        {/* Loading Animation - No countdown, just spinning */}
+        {/* Enhanced Loading Animation */}
         <div className="mb-6 relative">
           <div className="flex justify-center items-center gap-3 mb-4">
             <div className="relative">
-              <Loader2 className="h-12 w-12 text-blue-500 animate-spin" />
+              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
               <div className="absolute inset-0 rounded-full border-2 border-blue-200 animate-pulse"></div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-700 animate-pulse">REDIRECTING...</div>
-              <span className="text-sm text-gray-600">{timeElapsed}s elapsed</span>
+              <div
+                className={`text-3xl font-bold transition-all duration-500 ${
+                  countdown <= 1 ? "text-red-500 animate-bounce" : "text-gray-700"
+                }`}
+              >
+                {countdown}
+              </div>
+              <span className="text-sm text-gray-600">
+                {countdown === 1 ? "second remaining" : "seconds remaining"}
+              </span>
             </div>
           </div>
 
-          {/* Infinite Progress Bar */}
+          {/* Animated Progress Bar */}
           <div className="w-full bg-gray-200 rounded-full h-4 mb-4 overflow-hidden shadow-inner">
-            <div className="h-4 bg-gradient-to-r from-blue-500 via-green-500 to-blue-500 rounded-full animate-pulse">
-              <div className="h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+            <div
+              className={`h-4 rounded-full transition-all duration-300 ease-out ${
+                countdown <= 1
+                  ? "bg-gradient-to-r from-red-500 to-orange-500 animate-pulse"
+                  : "bg-gradient-to-r from-blue-500 to-green-500"
+              }`}
+              style={{
+                width: `${progress}%`,
+                boxShadow: countdown <= 1 ? "0 0 10px rgba(239, 68, 68, 0.5)" : "0 0 10px rgba(59, 130, 246, 0.3)",
+              }}
+            >
+              <div className="h-full bg-white/20 animate-pulse"></div>
             </div>
           </div>
 
-          {/* Fast animated dots */}
+          {/* Animated dots with stagger effect */}
           <div className="flex justify-center space-x-2">
             {[0, 1, 2].map((index) => (
               <div
                 key={index}
-                className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  countdown <= 1 ? "bg-red-500 animate-bounce" : "bg-blue-500 animate-bounce"
+                }`}
                 style={{
-                  animationDelay: `${index * 100}ms`,
-                  animationDuration: "0.6s",
+                  animationDelay: `${index * 150}ms`,
+                  transform: countdown <= 1 ? "scale(1.2)" : "scale(1)",
                 }}
               ></div>
             ))}
           </div>
 
-          {/* Pulsing ring effect */}
-          <div className="absolute inset-0 rounded-3xl pointer-events-none ring-2 ring-blue-500/30 animate-pulse"></div>
+          {/* Pulsing ring effect around the whole section */}
+          <div
+            className={`absolute inset-0 rounded-3xl pointer-events-none transition-all duration-1000 ${
+              countdown <= 1 ? "ring-4 ring-red-500/30 animate-pulse" : "ring-2 ring-blue-500/20"
+            }`}
+          ></div>
         </div>
 
         {/* Manual Redirect Button */}
@@ -159,20 +210,21 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
               setRedirectAttempts((prev) => prev + 1)
               window.open(redirectUrl, "_blank", "noopener,noreferrer")
             }}
-            className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 animate-pulse"
+            className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
           >
             <ExternalLink className="h-5 w-5" />
             Click Here if Not Redirected
           </button>
 
+          {/* Show realistic attempt count */}
           <p className="text-xs text-gray-500">
-            Attempts: {redirectAttempts} • Time: {timeElapsed}s
+            {redirectAttempts === 1 ? "1 redirect attempt" : `${redirectAttempts} redirect attempts`}
           </p>
         </div>
 
         {/* Security Message */}
         <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-xs text-yellow-700">🔒 Instant secure redirect in progress...</p>
+          <p className="text-xs text-yellow-700">🔒 Secure redirect to official claim site</p>
         </div>
       </div>
     </div>
