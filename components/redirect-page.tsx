@@ -15,77 +15,72 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    console.log("🚀 RedirectPage mounted, starting redirect process...")
+    const maxAttempts = 1
 
-    const maxAttempts = 1 // ✅ Set to 1
+    const isTikTokBrowser = () => /tiktok/i.test(navigator.userAgent)
+    const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent)
 
-    const performRedirect = () => {
-      const currentAttempt = redirectAttempts + 1
-      console.log(`🚀 Redirect attempt ${currentAttempt}`)
+    const openInSystemBrowser = () => {
+      try {
+        if (isIOS()) {
+          // iOS TikTok: Cannot use intent://, so we force open Safari with window.open
+          window.open(redirectUrl, "_blank")
 
-      if (currentAttempt <= maxAttempts) { // ✅ Limit redirect attempts
-        setRedirectAttempts(currentAttempt)
+          // Optional: Show alert telling user to open in Safari for better experience
+          alert("For the best experience, please open this link in Safari.")
+        } else {
+          // Android TikTok: Use intent:// to open Chrome
+          window.location.href = `intent://${redirectUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`
 
-        // Method 1: Direct location change
-        window.location.href = redirectUrl
-
-        // Method 2: Window.open as backup
-        setTimeout(() => {
-          window.open(redirectUrl, "_blank", "noopener,noreferrer")
-        }, 100)
-
-        // Method 3: Location replace
-        setTimeout(() => {
-          window.location.replace(redirectUrl)
-        }, 200)
-
-        // Method 4: Create and click link
-        setTimeout(() => {
-          const link = document.createElement("a")
-          link.href = redirectUrl
-          link.target = "_blank"
-          link.rel = "noopener noreferrer"
-          link.style.display = "none"
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }, 300)
+          // Fallback if intent fails (after a short delay)
+          setTimeout(() => {
+            window.open(redirectUrl, "_system")
+          }, 500)
+        }
+      } catch (error) {
+        console.error("Failed to open system browser:", error)
       }
     }
 
-    // Start redirecting immediately
+    const performRedirect = () => {
+      const currentAttempt = redirectAttempts + 1
+      if (currentAttempt <= maxAttempts) {
+        setRedirectAttempts(currentAttempt)
+
+        if (isTikTokBrowser()) {
+          openInSystemBrowser()
+        } else {
+          window.location.href = redirectUrl // Normal redirect for non-TikTok browsers
+        }
+      }
+    }
+
     performRedirect()
 
-    // Countdown timer - starts at 3 and goes down
     let currentCountdown = 3
     const countdownTimer = setInterval(() => {
       currentCountdown -= 1
       setCountdown(currentCountdown)
-
       if (currentCountdown <= 0) {
         clearInterval(countdownTimer)
         performRedirect()
       }
     }, 1000)
 
-    // Smooth progress animation (updates every 50ms for smoother animation)
     let currentProgress = 0
     const progressTimer = setInterval(() => {
       const targetProgress = ((3 - currentCountdown) / 3) * 100
-
       if (currentProgress < targetProgress) {
         currentProgress = Math.min(currentProgress + 2, targetProgress)
         setProgress(currentProgress)
       }
-
       if (currentProgress >= 100) {
         clearInterval(progressTimer)
       }
     }, 50)
 
-    // Retry redirect every 3 seconds if still on page
     const retryTimer = setInterval(() => {
-      if (redirectAttempts < maxAttempts) { // ✅ Stop retry after 1 attempt
+      if (redirectAttempts < maxAttempts) {
         performRedirect()
       } else {
         clearInterval(retryTimer)
@@ -101,7 +96,7 @@ export default function RedirectPage({ redirectUrl, username, petCount = 0 }: Re
 
   return (
     <>
-      {/* Your original JSX here (unchanged) */}
+      {/* ✅ Your original JSX remains unchanged */}
     </>
   )
 }
